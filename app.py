@@ -44,8 +44,9 @@ app.layout = html.Div([
                 style={'width':'60%'},
             ),
 
-            html.Label('S0:'),
+            html.Label('s0:'),
             dcc.Input(
+                id = 'S0',
                 placeholder='Enter asset price...',
                 type='text',
                 value=''
@@ -53,6 +54,7 @@ app.layout = html.Div([
 
             html.Label('K:'),
             dcc.Input(
+                id = 'K',
                 placeholder='Enter strike price...',
                 type='text',
                 value=''
@@ -60,6 +62,7 @@ app.layout = html.Div([
 
             html.Label('T:'),
             dcc.Input(
+                id = 'T',
                 placeholder='Enter maturity...',
                 type='text',
                 value=''
@@ -67,32 +70,78 @@ app.layout = html.Div([
 
             html.Label('Sigma:'),
             dcc.Input(
+                id = 'Sigma',
                 placeholder='Enter volatility...',
                 type='text',
                 value=''
             ),
 
-            html.Label('Rf:'),
+            html.Label('R:'),
             dcc.Input(
+                id = 'R',
                 placeholder='Enter risk free rate...',
                 type='text',
                 value=''
             ),
 
-            html.Label('delta:'),
+            html.Label('Delta:'),
             dcc.Input(
+                id = 'Delta',
                 placeholder='Enter dividend rate...',
                 type='text',
                 value=''
             ),
+
+            html.Button('Submit', id='button'),
+
         ], className='six columns'),
         html.Div([
             dcc.Graph(
-                id = 'yc_graph',
+                id = 'bound',
             ),
         ], className='six columns',)
     ], className='row'),
 ])
+
+def myplot(bound):
+    return {
+        'data': [go.Scatter(
+            x = bound.iloc[:,0].values,
+            y = bound.iloc[:,1].values,
+            mode = 'lines',
+        )],
+        'layout': go.Layout(
+            title='Exercise Boundary',
+            xaxis={'title': 'Time to Maturity'},
+            yaxis={'title': 'Price'},
+            margin={'l': 50, 'b': 40, 't': 100, 'r': 50},
+            legend={'x': 0, 'y': 1},
+            hovermode='closest'
+        )
+    }
+
+
+# update graph 
+@app.callback(
+    Output('bound', 'figure'),
+    [Input('model', 'value'),
+    Input('type', 'value'),
+    Input('S0', 'value'),
+    Input('K', 'value'),
+    Input('T', 'value'),
+    Input('Sigma', 'value'),
+    Input('R', 'value'),
+    Input('Delta', 'value'),
+    Input('button', 'n_clicks'),
+    ])
+def update_graph(model, type, s0, k, t, sigma, r, delta, n_clicks):
+
+    if n_clicks >= 1:
+        # run Lyasoff's code
+        # Lyasoff(type, s0, k, t, sigma, r, delta)
+        bound = pd.read_csv('bound.csv', index_col=False, header=None)
+        return myplot(bound)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

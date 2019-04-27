@@ -4,6 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
+from call_boundary import call_boundary
 
 # submit botton version
 
@@ -35,7 +36,7 @@ app.layout = html.Div([
                 style={'width':'60%'},
             ),
 
-            html.Label('Option kind:'),
+            html.Label('Option type:'),
             dcc.RadioItems(
                 id='kind',
                 options=[
@@ -51,7 +52,7 @@ app.layout = html.Div([
                 id = 'K',
                 placeholder='Enter strike price...',
                 type='text',
-                value=''
+                value='80'
             ),
 
             html.Label('T:'),
@@ -59,7 +60,7 @@ app.layout = html.Div([
                 id = 'T',
                 placeholder='Enter maturity...',
                 type='text',
-                value=''
+                value='1'
             ),
 
             html.Label('Sigma:'),
@@ -67,7 +68,7 @@ app.layout = html.Div([
                 id = 'Sigma',
                 placeholder='Enter volatility...',
                 type='text',
-                value=''
+                value='0.2'
             ),
 
             html.Label('R:'),
@@ -75,15 +76,15 @@ app.layout = html.Div([
                 id = 'R',
                 placeholder='Enter risk free rate...',
                 type='text',
-                value=''
+                value='0.04'
             ),
 
-            html.Label('Delta:'),
+            html.Label('Dividend:'),
             dcc.Input(
                 id = 'Delta',
                 placeholder='Enter dividend rate...',
                 type='text',
-                value=''
+                value='0.03'
             ),
 
             # Interval
@@ -148,6 +149,10 @@ def run_code(model, kind, k, t, sigma, r, delta):
             Delta={}
         '''.format(model, kind, k, t, sigma, r, delta)
     )
+    try:
+        call_boundary(float(r), float(delta), float(sigma), float(k), float(t))
+    except Exception:
+        pass
 
 # update graph
 @app.callback(

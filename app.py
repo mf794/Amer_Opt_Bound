@@ -85,9 +85,6 @@ app.layout = html.Div([
                 type='text',
                 value=''
             ),
-            html.Div([
-                html.Button('Submit', id='button'),
-            ]),
 
             # Interval
             html.Div([
@@ -131,19 +128,17 @@ def myplot(bound):
 # run Lyasoff's code
 @app.callback(
     Output('hid1', 'children'),
-    [Input('button', 'n_clicks')],
-    [State('model', 'value'),
-    State('kind', 'value'),
-    State('K', 'value'),
-    State('T', 'value'),
-    State('Sigma', 'value'),
-    State('R', 'value'),
-    State('Delta', 'value'),]
+    [Input('model', 'value'),
+    Input('kind', 'value'),
+    Input('K', 'value'),
+    Input('T', 'value'),
+    Input('Sigma', 'value'),
+    Input('R', 'value'),
+    Input('Delta', 'value'),]
 )
-def run_code(n_clicks, model, kind, k, t, sigma, r, delta):
+def run_code(model, kind, k, t, sigma, r, delta):
     print(
         '''
-            the button has been clicked {} times, with values:
             model={}
             kind={}
             K={}
@@ -151,7 +146,7 @@ def run_code(n_clicks, model, kind, k, t, sigma, r, delta):
             Sigma={}
             R={}
             Delta={}
-        '''.format(n_clicks, model, kind, k, t, sigma, r, delta)
+        '''.format(model, kind, k, t, sigma, r, delta)
     )
 
 # update graph

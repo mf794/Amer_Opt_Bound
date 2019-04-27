@@ -46,7 +46,20 @@ app.layout = html.Div([
                 value='c',
                 labelStyle={'display': 'inline-block'}
             ),
-
+            
+            html.Label('Change parameter:'),
+            dcc.RadioItems(
+                id='param',
+                options=[
+                    {'label': 'K', 'value': 'k'},
+                    {'label': 'T', 'value': 't'},
+                    {'label': 'Sigma', 'value': 'sigma'},
+                    {'label': 'R', 'value': 'r'},
+                    {'label': 'Dividend', 'value': 'delta'},
+                ],
+                value='k',
+                labelStyle={'display': 'inline-block'}
+            ),
             html.Label('K:'),
             dcc.Input(
                 id = 'K',

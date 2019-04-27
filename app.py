@@ -1,9 +1,11 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output,State
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
+
+# submit botton version
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -33,23 +35,15 @@ app.layout = html.Div([
                 style={'width':'60%'},
             ),
 
-            html.Label('Option Type:'),
-            dcc.Dropdown(
-                id = 'type',
+            html.Label('Option kind:'),
+            dcc.RadioItems(
+                id='kind',
                 options=[
                     {'label': 'Call', 'value': 'c'},
                     {'label': 'Put', 'value': 'p'},
                 ],
                 value='c',
-                style={'width':'60%'},
-            ),
-
-            html.Label('s0:'),
-            dcc.Input(
-                id = 'S0',
-                placeholder='Enter asset price...',
-                type='text',
-                value=''
+                labelStyle={'display': 'inline-block'}
             ),
 
             html.Label('K:'),
@@ -91,8 +85,21 @@ app.layout = html.Div([
                 type='text',
                 value=''
             ),
+            html.Div([
+                html.Button('Submit', id='button'),
+            ]),
 
-            html.Button('Submit', id='button'),
+            # Interval
+            html.Div([
+                dcc.Interval(
+                    id='interval',
+                    interval=100,
+                    n_intervals=0
+                )
+            ]),
+
+            # Hidden Div
+            html.Div(id='hid1', style={'display':'none'})
 
         ], className='six columns'),
         html.Div([
@@ -121,27 +128,40 @@ def myplot(bound):
     }
 
 
-# update graph 
+# run Lyasoff's code
 @app.callback(
-    Output('bound', 'figure'),
-    [Input('model', 'value'),
-    Input('type', 'value'),
-    Input('S0', 'value'),
-    Input('K', 'value'),
-    Input('T', 'value'),
-    Input('Sigma', 'value'),
-    Input('R', 'value'),
-    Input('Delta', 'value'),
-    Input('button', 'n_clicks'),
-    ])
-def update_graph(model, type, s0, k, t, sigma, r, delta, n_clicks):
+    Output('hid1', 'children'),
+    [Input('button', 'n_clicks')],
+    [State('model', 'value'),
+    State('kind', 'value'),
+    State('K', 'value'),
+    State('T', 'value'),
+    State('Sigma', 'value'),
+    State('R', 'value'),
+    State('Delta', 'value'),]
+)
+def run_code(n_clicks, model, kind, k, t, sigma, r, delta):
+    print(
+        '''
+            the button has been clicked {} times, with values:
+            model={}
+            kind={}
+            K={}
+            T={}
+            Sigma={}
+            R={}
+            Delta={}
+        '''.format(n_clicks, model, kind, k, t, sigma, r, delta)
+    )
 
-    if n_clicks >= 1:
-        # run Lyasoff's code
-        # Lyasoff(type, s0, k, t, sigma, r, delta)
-        bound = pd.read_csv('bound.csv', index_col=False, header=None)
-        return myplot(bound)
-
+# update graph
+@app.callback(
+    Output('bound', 'figure'), 
+    [Input('interval', 'n_intervals')]
+)
+def update_graph(n_intervals):
+    bound = pd.read_csv('bound.csv', index_col=False, header=None)
+    return myplot(bound)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

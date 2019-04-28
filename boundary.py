@@ -20,11 +20,17 @@ def EP(S, t, K, sigma, r, delta):
 def F(epsilon, u, v, sigma, r, delta, t):
     return 1 + erf(((r - delta + epsilon * 0.5 * sigma ** 2) * (u - t) - log(v)) / (sigma * sqrt(2 * (u - t))))
 
-def F1(z, t):
+def F1C(z, t):
     return exp(-delta * (z - t)) * (delta / 2) * F(1, z, f(z) / f(t), sigma, r, delta, t)
 
-def F2(z, t):
+def F2C(z, t):
     return exp(-r * (z - t)) * (r * K / 2) * F(-1, z, f(z) / f(t), sigma, r, delta, t)
+
+def F1P(z, t):
+    return exp(-delta * (z - t)) * (delta / 2) * (2 -  F(1, z, f(z) / f(t), sigma, r, delta, t))
+
+def F2P(z, t):
+    return exp(-r * (z - t)) * (r * K / 2) * (2 - F(-1, z, f(z) / f(t), sigma, r, delta, t))
 
 def call_boundary(r, delta, sigma, K, T, iteration=3):
     l1 = np.linspace(0, T * 0.9, num=10, endpoint=False)
@@ -33,8 +39,8 @@ def call_boundary(r, delta, sigma, K, T, iteration=3):
     f = interp1d(absc, [K * max(1, r / delta)] * len(absc), kind='cubic')
     
     for iter_count in range(iteration):
-        F1_int = [integrate.fixed_quad(F1, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
-        F2_int = [integrate.fixed_quad(F2, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
+        F1_int = [integrate.fixed_quad(F1C, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
+        F2_int = [integrate.fixed_quad(F2C, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
         loc = [optimize.brentq(lambda x: x - K - EC(x, T - absc[time_idx], K, sigma, r, delta) - F1_int[time_idx] * x + F2_int[time_idx], K, K + 100) for time_idx in range(len(absc) - 1)]
         loc.append(K * max(1, r / delta))
         f = interp1d(absc, loc, kind='cubic')
@@ -48,8 +54,8 @@ def put_boundary(r, delta, sigma, K, T, iteration=3):
     f = interp1d(absc, [K] * len(absc), kind='cubic')
     
     for iter_count in range(iteration):
-        F1_int = [integrate.fixed_quad(F1, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
-        F2_int = [integrate.fixed_quad(F2, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
+        F1_int = [integrate.fixed_quad(F1P, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
+        F2_int = [integrate.fixed_quad(F2P, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
         loc = [optimize.brentq(lambda x: K - x - EP(x, T - absc[time_idx], K, sigma, r, delta) + F1_int[time_idx] * x - F2_int[time_idx], 1, K) for time_idx in range(len(absc) - 1)]
         loc.append(K)
         f = interp1d(absc, loc, kind='cubic')

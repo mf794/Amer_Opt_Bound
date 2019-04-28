@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from boundary import call_boundary, put_boundary
@@ -60,16 +61,19 @@ app.layout = html.Div([
                 value='k',
                 labelStyle={'display': 'inline-block'}
             ),
-            
+
             html.Div([
                 dcc.RangeSlider(
                     id='slider',
                     min=0,
                     max=30,
                     value=[10, 15],
+                    step=0.01,
                     allowCross=True
                 )
-            ]),
+            ], style={'marginBottom':20, 'marginTop':20}),
+
+            html.Div(id='slider_output'),
 
             html.Div([
                 html.Label('K:'),
@@ -207,6 +211,53 @@ def run_code(model, kind, k, t, sigma, r, delta):
 def update_graph(n_intervals):
     bound = pd.read_csv('bound.csv', index_col=False, header=None)
     return myplot(bound)
+
+# update slider
+@app.callback(
+    [Output('slider', 'min'),
+    Output('slider', 'max'),
+    Output('slider', 'value')],
+    [Input('param','value'),
+    Input('K', 'value'),
+    Input('T', 'value'),
+    Input('Sigma', 'value'),
+    Input('R', 'value'),
+    Input('Delta', 'value'),],
+)
+def update_slider(param, k, t, sigma, r, delta):
+    if param == 'k':
+        k = float(k)
+        slider_min = k*0.8
+        slider_max = k*1.2
+        return (slider_min, slider_max, [k,k])
+    elif param == 't':
+        t = float(t)
+        slider_min = t*0.8
+        slider_max = t*1.2
+        return (slider_min, slider_max, [t,t])
+    elif param == 'sigma':
+        sigma = float(sigma)
+        slider_min = sigma*0.8
+        slider_max = sigma*1.2
+        return (slider_min, slider_max, [sigma,sigma])
+    elif param == 'r':
+        r = float(r)
+        slider_min = r*0.8
+        slider_max = r*1.2
+        return (slider_min, slider_max, [r,r])  
+    elif param == 'delta':
+        delta = float(delta)
+        slider_min = delta*0.8
+        slider_max = delta*1.2
+        return (slider_min, slider_max, [delta,delta])
+
+@app.callback(
+    Output('slider_output', 'children'),
+    [Input('slider', 'value')],
+)
+def update_slider_output(slider_val):
+    info = f'{slider_val[0]} ~ {slider_val[1]}'
+    return info
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -60,45 +60,71 @@ app.layout = html.Div([
                 value='k',
                 labelStyle={'display': 'inline-block'}
             ),
-            html.Label('K:'),
-            dcc.Input(
-                id = 'K',
-                placeholder='Enter strike price...',
-                type='text',
-                value='80'
-            ),
+            
+            html.Div([
+                dcc.RangeSlider(
+                    id='slider',
+                    min=0,
+                    max=30,
+                    value=[10, 15],
+                    allowCross=True
+                )
+            ]),
 
-            html.Label('T:'),
-            dcc.Input(
-                id = 'T',
-                placeholder='Enter maturity...',
-                type='text',
-                value='1'
-            ),
+            html.Div([
+                html.Label('K:'),
+                dcc.Input(
+                    id = 'K',
+                    placeholder='Enter strike price...',
+                    type='text',
+                    value='80'
+                ),
+            ], className='row'),
 
-            html.Label('Sigma:'),
-            dcc.Input(
-                id = 'Sigma',
-                placeholder='Enter volatility...',
-                type='text',
-                value='0.2'
-            ),
 
-            html.Label('R:'),
-            dcc.Input(
-                id = 'R',
-                placeholder='Enter risk free rate...',
-                type='text',
-                value='0.04'
-            ),
+            html.Div([
+                html.Label('T:'),
+                dcc.Input(
+                    id = 'T',
+                    placeholder='Enter maturity...',
+                    type='text',
+                    value='1'
+                ),
+            ], className='row'),
+        
+            html.Div([
+                html.Label('Sigma:'),
+                dcc.Input(
+                    id = 'Sigma',
+                    placeholder='Enter volatility...',
+                    type='text',
+                    value='0.2'
+                ),
+            ], className='row'),
+            
+            html.Div([
+                html.Label('R:'),
+                dcc.Input(
+                    id = 'R',
+                    placeholder='Enter risk free rate...',
+                    type='text',
+                    value='0.04'
+                ),
+            ], className='row'),
 
-            html.Label('Dividend:'),
-            dcc.Input(
-                id = 'Delta',
-                placeholder='Enter dividend rate...',
-                type='text',
-                value='0.03'
-            ),
+            html.Div([
+                html.Label('Dividend:'),
+                dcc.Input(
+                    id = 'Delta',
+                    placeholder='Enter dividend rate...',
+                    type='text',
+                    value='0.03'
+                ),
+            ], className='row'),
+
+
+
+
 
             # Interval
             html.Div([

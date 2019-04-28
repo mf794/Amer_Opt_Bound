@@ -7,32 +7,31 @@ from numpy import log, exp, sqrt
 
 import numpy as np
 
-def EC(S, t, K, sigma, r, delta):
-    d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
-    d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
-    return 0.5 * (S * exp(-delta * t) * (1 + erf(d1 / sqrt(2))) - K * exp(-r * t) * (1 + erf(d2 / sqrt(2))))
-
-def EP(S, t, K, sigma, r, delta):
-    d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
-    d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
-    return 0.5 * (K * exp(-r * t) * (1 - erf(d2 / sqrt(2))) - S * exp(-delta * t) * (1 - erf(d1 / sqrt(2))))
-
-def F(epsilon, u, v, sigma, r, delta, t):
-    return 1 + erf(((r - delta + epsilon * 0.5 * sigma ** 2) * (u - t) - log(v)) / (sigma * sqrt(2 * (u - t))))
-
-def F1C(z, t):
-    return exp(-delta * (z - t)) * (delta / 2) * F(1, z, f(z) / f(t), sigma, r, delta, t)
-
-def F2C(z, t):
-    return exp(-r * (z - t)) * (r * K / 2) * F(-1, z, f(z) / f(t), sigma, r, delta, t)
-
-def F1P(z, t):
-    return exp(-delta * (z - t)) * (delta / 2) * (2 -  F(1, z, f(z) / f(t), sigma, r, delta, t))
-
-def F2P(z, t):
-    return exp(-r * (z - t)) * (r * K / 2) * (2 - F(-1, z, f(z) / f(t), sigma, r, delta, t))
-
 def call_boundary(r, delta, sigma, K, T, iteration=3):
+    def EC(S, t, K, sigma, r, delta):
+        d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
+        d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
+        return 0.5 * (S * exp(-delta * t) * (1 + erf(d1 / sqrt(2))) - K * exp(-r * t) * (1 + erf(d2 / sqrt(2))))
+
+    def EP(S, t, K, sigma, r, delta):
+        d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
+        d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
+        return 0.5 * (K * exp(-r * t) * (1 - erf(d2 / sqrt(2))) - S * exp(-delta * t) * (1 - erf(d1 / sqrt(2))))
+
+    def F(epsilon, u, v, sigma, r, delta, t):
+        return 1 + erf(((r - delta + epsilon * 0.5 * sigma ** 2) * (u - t) - log(v)) / (sigma * sqrt(2 * (u - t))))
+
+    def F1C(z, t):
+        return exp(-delta * (z - t)) * (delta / 2) * F(1, z, f(z) / f(t), sigma, r, delta, t)
+
+    def F2C(z, t):
+        return exp(-r * (z - t)) * (r * K / 2) * F(-1, z, f(z) / f(t), sigma, r, delta, t)
+
+    def F1P(z, t):
+        return exp(-delta * (z - t)) * (delta / 2) * (2 -  F(1, z, f(z) / f(t), sigma, r, delta, t))
+
+    def F2P(z, t):
+        return exp(-r * (z - t)) * (r * K / 2) * (2 - F(-1, z, f(z) / f(t), sigma, r, delta, t))
     l1 = np.linspace(0, T * 0.9, num=10, endpoint=False)
     l2 = np.linspace(T * 0.9, T, num=15, endpoint=True)
     absc = np.concatenate((l1, l2), axis=0)
@@ -48,6 +47,30 @@ def call_boundary(r, delta, sigma, K, T, iteration=3):
     np.savetxt("bound.csv", np.transpose(np.vstack((np.linspace(0, T, 200), f(np.linspace(0, T, 200))))), delimiter=",")
     
 def put_boundary(r, delta, sigma, K, T, iteration=3):
+    def EC(S, t, K, sigma, r, delta):
+        d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
+        d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
+        return 0.5 * (S * exp(-delta * t) * (1 + erf(d1 / sqrt(2))) - K * exp(-r * t) * (1 + erf(d2 / sqrt(2))))
+
+    def EP(S, t, K, sigma, r, delta):
+        d1 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) + 0.5 * sigma * sqrt(t)
+        d2 = (log(S / K) + (r - delta) * t) / sigma / sqrt(t) - 0.5 * sigma * sqrt(t)
+        return 0.5 * (K * exp(-r * t) * (1 - erf(d2 / sqrt(2))) - S * exp(-delta * t) * (1 - erf(d1 / sqrt(2))))
+
+    def F(epsilon, u, v, sigma, r, delta, t):
+        return 1 + erf(((r - delta + epsilon * 0.5 * sigma ** 2) * (u - t) - log(v)) / (sigma * sqrt(2 * (u - t))))
+
+    def F1C(z, t):
+        return exp(-delta * (z - t)) * (delta / 2) * F(1, z, f(z) / f(t), sigma, r, delta, t)
+
+    def F2C(z, t):
+        return exp(-r * (z - t)) * (r * K / 2) * F(-1, z, f(z) / f(t), sigma, r, delta, t)
+
+    def F1P(z, t):
+        return exp(-delta * (z - t)) * (delta / 2) * (2 -  F(1, z, f(z) / f(t), sigma, r, delta, t))
+
+    def F2P(z, t):
+        return exp(-r * (z - t)) * (r * K / 2) * (2 - F(-1, z, f(z) / f(t), sigma, r, delta, t))
     l1 = np.linspace(0, T * 0.9, num=10, endpoint=False)
     l2 = np.linspace(T * 0.9, T, num=15, endpoint=True)
     absc = np.concatenate((l1, l2), axis=0)

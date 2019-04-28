@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
-from call_boundary import call_boundary
+from boundary import call_boundary, put_boundary
 
 # submit botton version
 
@@ -188,10 +188,16 @@ def run_code(model, kind, k, t, sigma, r, delta):
             Delta={}
         '''.format(model, kind, k, t, sigma, r, delta)
     )
-    try:
-        call_boundary(float(r), float(delta), float(sigma), float(k), float(t))
-    except Exception:
-        pass
+    if kind == 'c':
+        try:
+            call_boundary(float(r), float(delta), float(sigma), float(k), float(t))
+        except Exception:
+            pass
+    elif kind == 'p':
+        try:
+            put_boundary(float(r), float(delta), float(sigma), float(k), float(t))
+        except Exception:
+            pass        
 
 # update graph
 @app.callback(

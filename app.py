@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import time
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
@@ -66,9 +67,6 @@ app.layout = html.Div([
             html.Div([
                 dcc.RangeSlider(
                     id='slider',
-                    min=0,
-                    max=30,
-                    value=[10, 10],
                     step=0.01,
                     allowCross=True
                 )
@@ -123,7 +121,7 @@ app.layout = html.Div([
                     id = 'Delta',
                     placeholder='Enter dividend rate...',
                     type='text',
-                    value='0.03'
+                    value='0.07'
                 ),
             ], className='row'),
 
@@ -131,7 +129,7 @@ app.layout = html.Div([
             html.Div([
                 dcc.Interval(
                     id='interval',
-                    interval=100,
+                    interval=1000,
                     n_intervals=0
                 )
             ]),
@@ -149,11 +147,11 @@ app.layout = html.Div([
 ])
 
 def myplot(bound):
-    if len(bound) == 2:
+    if len(bound.columns) == 1:
         return {
             'data': [go.Scatter(
-                x = bound.iloc[:,0].values,
-                y = bound.iloc[:,1].values,
+                x = bound.index.values,
+                y = bound.iloc[:,0].values,
                 mode = 'lines',
             )],
             'layout': go.Layout(
@@ -168,11 +166,11 @@ def myplot(bound):
     else:
         return {
             'data': [go.Surface(
-                z = bound.as_matrix(),
+                z = bound.iloc[:,1:].values,
             )],
             'layout': go.Layout(
                 title='Exercise Boundary',
-                autosize=False,
+                autosize=True,
                 width=500,
                 height=500,
                 margin=dict(
@@ -238,18 +236,26 @@ def run_code(model, kind, k, t, sigma, r, delta, slider, param):
         'delta': delta
     }
     if slider[0] != slider[1]:
-        param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
+        if param in ['r', 'delta', 'sigma']:
+            param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
+        else:
+            param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
+
         print(param_dict)
+        print(time.time())
         if kind == 'c':
             safe_call_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
         elif kind == 'p':
             safe_put_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+        print(time.time())
     else:
         print(param_dict)
+        print(time.time())
         if kind == 'c':
             safe_call(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
         elif kind == 'p':
             safe_put(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+        print(time.time())
 
 # update graph
 @app.callback(
@@ -258,10 +264,13 @@ def run_code(model, kind, k, t, sigma, r, delta, slider, param):
     Input('slider', 'value')]
 )
 def update_graph(n_intervals, slider):
-    if slider[0] != slider[1]:
-        bound = pd.read_csv('bound_list.csv', index_col=False, header=None)
-    else:
-        bound = pd.read_csv('bound.csv', index_col=False, header=None)
+    while True:
+        try:
+            bound = pd.read_csv('bound.csv', index_col=0, header=None)
+        except pd.errors.EmptyDataError as e:
+            print(e)
+        else:
+            break
     return myplot(bound)
 
 # update slider
@@ -279,28 +288,28 @@ def update_graph(n_intervals, slider):
 def update_slider(param, k, t, sigma, r, delta):
     if param == 'k':
         k = float(k)
-        slider_min = k*0.8
-        slider_max = k*1.2
+        slider_min = k*0.7
+        slider_max = k*1.3
         return (slider_min, slider_max, [k,k])
     elif param == 't':
         t = float(t)
-        slider_min = t*0.8
-        slider_max = t*1.2
+        slider_min = t*0.5
+        slider_max = t*1.5
         return (slider_min, slider_max, [t,t])
     elif param == 'sigma':
         sigma = float(sigma)
-        slider_min = sigma*0.8
-        slider_max = sigma*1.2
+        slider_min = 0.01
+        slider_max = 0.5
         return (slider_min, slider_max, [sigma,sigma])
     elif param == 'r':
         r = float(r)
-        slider_min = r*0.8
-        slider_max = r*1.2
+        slider_min = 0
+        slider_max = 0.1
         return (slider_min, slider_max, [r,r])  
     elif param == 'delta':
         delta = float(delta)
-        slider_min = delta*0.8
-        slider_max = delta*1.2
+        slider_min = 0
+        slider_max = 0.1
         return (slider_min, slider_max, [delta,delta])
 
 @app.callback(

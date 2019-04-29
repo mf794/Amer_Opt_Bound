@@ -74,41 +74,41 @@ def put_boundary(r, delta, sigma, K, T, iteration=3, list_out=False):
 def call_boundary_list(r, delta, sigma, K, T):
     if isinstance(r, np.ndarray):
         result = [call_boundary(iter_r, delta, sigma, K, T, list_out=True) for iter_r in r]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(delta, np.ndarray):
         result = [call_boundary(r, iter_delta, sigma, K, T, list_out=True) for iter_delta in delta]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(sigma, np.ndarray):
         result = [call_boundary(r, delta, iter_sigma, K, T, list_out=True) for iter_sigma in sigma]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(K, np.ndarray):
         result = [call_boundary(r, delta, sigma, iter_K, T, list_out=True) for iter_K in K]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
 def put_boundary_list(r, delta, sigma, K, T):
     if isinstance(r, np.ndarray):
         result = [put_boundary(iter_r, delta, sigma, K, T, list_out=True) for iter_r in r]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(delta, np.ndarray):
         result = [put_boundary(r, iter_delta, sigma, K, T, list_out=True) for iter_delta in delta]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(sigma, np.ndarray):
         result = [put_boundary(r, delta, iter_sigma, K, T, list_out=True) for iter_sigma in sigma]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
 
     if isinstance(K, np.ndarray):
         result = [put_boundary(r, delta, sigma, iter_K, T, list_out=True) for iter_K in K]
-        np.savetxt("bound_list.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
+        np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return

@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output, State
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from boundary import call_boundary, put_boundary
+from boundary import call_boundary, put_boundary, call_boundary_list, put_boundary_list
 
 # submit botton version
 
@@ -13,6 +13,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
+
 
 app.layout = html.Div([
     # Header
@@ -67,11 +68,11 @@ app.layout = html.Div([
                     id='slider',
                     min=0,
                     max=30,
-                    value=[10, 15],
+                    value=[10, 10],
                     step=0.01,
                     allowCross=True
                 )
-            ], style={'marginBottom':20, 'marginTop':20}),
+            ]),
 
             html.Div(id='slider_output'),
 
@@ -126,10 +127,6 @@ app.layout = html.Div([
                 ),
             ], className='row'),
 
-
-
-
-
             # Interval
             html.Div([
                 dcc.Interval(
@@ -152,22 +149,67 @@ app.layout = html.Div([
 ])
 
 def myplot(bound):
-    return {
-        'data': [go.Scatter(
-            x = bound.iloc[:,0].values,
-            y = bound.iloc[:,1].values,
-            mode = 'lines',
-        )],
-        'layout': go.Layout(
-            title='Exercise Boundary',
-            xaxis={'title': 'Time to Maturity'},
-            yaxis={'title': 'Price'},
-            margin={'l': 50, 'b': 40, 't': 100, 'r': 50},
-            legend={'x': 0, 'y': 1},
-            hovermode='closest'
-        )
-    }
+    if len(bound) == 2:
+        return {
+            'data': [go.Scatter(
+                x = bound.iloc[:,0].values,
+                y = bound.iloc[:,1].values,
+                mode = 'lines',
+            )],
+            'layout': go.Layout(
+                title='Exercise Boundary',
+                xaxis={'title': 'Time to Maturity'},
+                yaxis={'title': 'Price'},
+                margin={'l': 50, 'b': 40, 't': 100, 'r': 50},
+                legend={'x': 0, 'y': 1},
+                hovermode='closest'
+            )
+        }
+    else:
+        return {
+            'data': [go.Surface(
+                z = bound.as_matrix(),
+            )],
+            'layout': go.Layout(
+                title='Exercise Boundary',
+                autosize=False,
+                width=500,
+                height=500,
+                margin=dict(
+                    l=65,
+                    r=50,
+                    b=65,
+                    t=90
+                )
+            )
+        }
+def safe_call(r, delta, sigma, k, t):
+    try:
+        call_boundary(r, delta, sigma, k, t)
+    except Exception as e:
+        print(e)
+        pass
 
+def safe_put(r, delta, sigma, k, t):
+    try:
+        put_boundary(r, delta, sigma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+def safe_call_list(r, delta, sigma, k, t):
+    try:
+        call_boundary_list(r, delta, sigma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+def safe_put_list(r, delta, sigma, k, t):
+    try:
+        put_boundary_list(r, delta, sigma, k, t)
+    except Exception as e:
+        print(e)
+        pass
 
 # run Lyasoff's code
 @app.callback(
@@ -178,38 +220,48 @@ def myplot(bound):
     Input('T', 'value'),
     Input('Sigma', 'value'),
     Input('R', 'value'),
-    Input('Delta', 'value'),]
+    Input('Delta', 'value'),
+    Input('slider', 'value'),
+    Input('param', 'value')]
 )
-def run_code(model, kind, k, t, sigma, r, delta):
-    print(
-        '''
-            model={}
-            kind={}
-            K={}
-            T={}
-            Sigma={}
-            R={}
-            Delta={}
-        '''.format(model, kind, k, t, sigma, r, delta)
-    )
-    if kind == 'c':
-        try:
-            call_boundary(float(r), float(delta), float(sigma), float(k), float(t))
-        except Exception:
-            pass
-    elif kind == 'p':
-        try:
-            put_boundary(float(r), float(delta), float(sigma), float(k), float(t))
-        except Exception:
-            pass        
+def run_code(model, kind, k, t, sigma, r, delta, slider, param):
+    k = float(k)
+    t = float(t)
+    sigma = float(sigma)
+    r = float(r)
+    delta = float(delta)
+    param_dict = {
+        'k': k,
+        't': t,
+        'sigma': sigma,
+        'r': r,
+        'delta': delta
+    }
+    if slider[0] != slider[1]:
+        param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
+        print(param_dict)
+        if kind == 'c':
+            safe_call_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+        elif kind == 'p':
+            safe_put_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+    else:
+        print(param_dict)
+        if kind == 'c':
+            safe_call(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+        elif kind == 'p':
+            safe_put(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
 
 # update graph
 @app.callback(
     Output('bound', 'figure'), 
-    [Input('interval', 'n_intervals')]
+    [Input('interval', 'n_intervals'),
+    Input('slider', 'value')]
 )
-def update_graph(n_intervals):
-    bound = pd.read_csv('bound.csv', index_col=False, header=None)
+def update_graph(n_intervals, slider):
+    if slider[0] != slider[1]:
+        bound = pd.read_csv('bound_list.csv', index_col=False, header=None)
+    else:
+        bound = pd.read_csv('bound.csv', index_col=False, header=None)
     return myplot(bound)
 
 # update slider

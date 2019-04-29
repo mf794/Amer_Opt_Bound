@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from boundary import call_boundary, put_boundary, call_boundary_list, put_boundary_list
-
+from boundary_jump import call_boundary_jump, put_boundary_jump, call_boundary_jump_list, put_boundary_jump_list
 # submit botton version
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -34,6 +34,7 @@ app.layout = html.Div([
                 id = 'model',
                 options=[
                     {'label': 'Black-Scholes', 'value': 'mod1'},
+                    {'label': 'Black-Scholes with jump', 'value': 'mod2'}
                 ],
                 value='mod1',
                 style={'width':'60%'},
@@ -134,8 +135,24 @@ app.layout = html.Div([
                 )
             ]),
 
-            # Hidden Div
-            html.Div(id='hid1', style={'display':'none'})
+            # Hidden Div1
+            html.Div([
+                html.Label('C:'),
+                dcc.Input(
+                    id = 'C',
+                    placeholder='Enter jump intensity...',
+                    type='text',
+                    value='1'
+                ),
+            
+                html.Label('Gamma:'),
+                dcc.Input(
+                    id = 'Gamma',
+                    placeholder='Enter jump intensity...',
+                    type='text',
+                    value='0.05'
+                ),
+            ],id='hid')
 
         ], className='six columns'),
         html.Div([
@@ -209,9 +226,39 @@ def safe_put_list(r, delta, sigma, k, t):
         print(e)
         pass
 
+def safe_call_jump(r, delta, sigma, c, gamma, k, t):
+    try:
+        call_boundary_jump(r, delta, sigma, c, gamma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+def safe_put_jump(r, delta, sigma, c, gamma, k, t):
+    try:
+        put_boundary_jump(r, delta, sigma, c, gamma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+def safe_call_jump_list(r, delta, sigma, c, gamma, k, t):
+    try:
+        call_boundary_jump_list(r, delta, sigma, c, gamma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+def safe_put_jump_list(r, delta, sigma, c, gamma, k, t):
+    try:
+        put_boundary_jump_list(r, delta, sigma, c, gamma, k, t)
+    except Exception as e:
+        print(e)
+        pass
+
+
+
 # run Lyasoff's code
 @app.callback(
-    Output('hid1', 'children'),
+    Output('hid', 'style'),
     [Input('model', 'value'),
     Input('kind', 'value'),
     Input('K', 'value'),
@@ -219,43 +266,90 @@ def safe_put_list(r, delta, sigma, k, t):
     Input('Sigma', 'value'),
     Input('R', 'value'),
     Input('Delta', 'value'),
+    Input('C', 'value'),
+    Input('Gamma', 'value'),
     Input('slider', 'value'),
     Input('param', 'value')]
 )
-def run_code(model, kind, k, t, sigma, r, delta, slider, param):
+def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
     k = float(k)
     t = float(t)
     sigma = float(sigma)
     r = float(r)
     delta = float(delta)
+    c = float(c)
+    gamma = float(gamma)
     param_dict = {
         'k': k,
         't': t,
         'sigma': sigma,
         'r': r,
-        'delta': delta
+        'delta': delta,
+        'c': c,
+        'gamma': gamma,
     }
-    if slider[0] != slider[1]:
-        if param in ['r', 'delta', 'sigma']:
-            param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
-        else:
-            param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
+    if model == 'mod1':
+        if slider[0] != slider[1]:
+            if param in ['r', 'delta', 'sigma']:
+                param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
+            else:
+                param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
 
-        print(param_dict)
-        print(time.time())
-        if kind == 'c':
-            safe_call_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-        elif kind == 'p':
-            safe_put_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-        print(time.time())
+            print(param_dict)
+            print(time.time())
+            if kind == 'c':
+                safe_call_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+            elif kind == 'p':
+                safe_put_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+            print(time.time())
+        else:
+            print(param_dict)
+            print(time.time())
+            if kind == 'c':
+                safe_call(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+            elif kind == 'p':
+                safe_put(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
+            print(time.time())
     else:
-        print(param_dict)
-        print(time.time())
-        if kind == 'c':
-            safe_call(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-        elif kind == 'p':
-            safe_put(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-        print(time.time())
+        if slider[0] != slider[1]:
+            if param in ['r', 'delta', 'sigma']:
+                param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
+            else:
+                param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
+
+            print(param_dict)
+            print(time.time())
+            if kind == 'c':
+                safe_call_jump_list(
+                    param_dict['r'], param_dict['delta'], param_dict['sigma'], 
+                    param_dict['c'], param_dict['gamma'],
+                    param_dict['k'], param_dict['t'])
+            elif kind == 'p':
+                safe_put_jump_list(
+                    param_dict['r'], param_dict['delta'], param_dict['sigma'], 
+                    param_dict['c'], param_dict['gamma'],
+                    param_dict['k'], param_dict['t'])            
+            print(time.time())
+        else:
+            print(param_dict)
+            print(time.time())
+            if kind == 'c':
+                safe_call_jump(
+                    param_dict['r'], param_dict['delta'], param_dict['sigma'], 
+                    param_dict['c'], param_dict['gamma'],
+                    param_dict['k'], param_dict['t'])
+            elif kind == 'p':
+                safe_put_jump(
+                    param_dict['r'], param_dict['delta'], param_dict['sigma'], 
+                    param_dict['c'], param_dict['gamma'],
+                    param_dict['k'], param_dict['t'])
+            print(time.time())
+    if model == 'mod2':
+        print(model)
+        pass
+    else:
+        print(model)
+        return {'display':'none'}
 
 # update graph
 @app.callback(

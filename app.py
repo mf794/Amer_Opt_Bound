@@ -156,7 +156,7 @@ def myplot(bound):
             )],
             'layout': go.Layout(
                 title='Exercise Boundary',
-                xaxis={'title': 'Time to Maturity'},
+                xaxis={'title': 'Time'},
                 yaxis={'title': 'Price'},
                 margin={'l': 50, 'b': 40, 't': 100, 'r': 50},
                 legend={'x': 0, 'y': 1},

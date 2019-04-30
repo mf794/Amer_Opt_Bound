@@ -60,6 +60,8 @@ app.layout = html.Div([
                     {'label': 'Sigma', 'value': 'sigma'},
                     {'label': 'R', 'value': 'r'},
                     {'label': 'Dividend', 'value': 'delta'},
+                    {'label': 'C', 'value': 'c'},
+                    {'label': 'Gamma', 'value': 'gamma'},
                 ],
                 value='k',
                 labelStyle={'display': 'inline-block'}
@@ -81,7 +83,7 @@ app.layout = html.Div([
                     id = 'K',
                     placeholder='Enter strike price...',
                     type='text',
-                    value='80'
+                    value='10'
                 ),
             ], className='row'),
 
@@ -290,7 +292,7 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
     }
     if model == 'mod1':
         if slider[0] != slider[1]:
-            if param in ['r', 'delta', 'sigma']:
+            if param in ['r', 'delta', 'sigma', 'gamma']:
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
             else:
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
@@ -312,7 +314,7 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
             print(time.time())
     else:
         if slider[0] != slider[1]:
-            if param in ['r', 'delta', 'sigma']:
+            if param in ['r', 'delta', 'sigma','gamma']:
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
             else:
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
@@ -377,9 +379,11 @@ def update_graph(n_intervals, slider):
     Input('T', 'value'),
     Input('Sigma', 'value'),
     Input('R', 'value'),
-    Input('Delta', 'value'),],
+    Input('Delta', 'value'),
+    Input('C', 'value'),
+    Input('Gamma', 'value')],
 )
-def update_slider(param, k, t, sigma, r, delta):
+def update_slider(param, k, t, sigma, r, delta, c, gamma):
     if param == 'k':
         k = float(k)
         slider_min = k*0.7
@@ -405,6 +409,16 @@ def update_slider(param, k, t, sigma, r, delta):
         slider_min = 0
         slider_max = 0.1
         return (slider_min, slider_max, [delta,delta])
+    elif param == 'c':
+        c = float(c)
+        slider_min = c*0.5
+        slider_max = c*1.5
+        return (slider_min, slider_max, [c,c])
+    elif param == 'gamma':
+        gamma = float(gamma)
+        slider_min = -0.1
+        slider_max = 0.1
+        return (slider_min, slider_max, [gamma,gamma])
 
 @app.callback(
     Output('slider_output', 'children'),

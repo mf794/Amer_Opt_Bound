@@ -152,12 +152,12 @@ def call_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(c, np.ndarray):
-        result = [call_boundary_jump(r, delta, iter_c, gamma, sigma, iter_K, T, list_out=True) for iter_c in c]
+        result = [call_boundary_jump(r, delta, iter_c, gamma, sigma, K, T, list_out=True) for iter_c in c]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
     if isinstance(gamma, np.ndarray):
-        result = [call_boundary_jump(r, delta, c, iter_gamma, sigma, iter_K, T, list_out=True) for iter_gamma in gamma]
+        result = [call_boundary_jump(r, delta, c, iter_gamma, sigma, K, T, list_out=True) for iter_gamma in gamma]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
@@ -167,7 +167,7 @@ def call_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(K, np.ndarray):
-        result = [call_boundary_jump(r, delta, sigma, iter_K, T, list_out=True) for iter_K in K]
+        result = [call_boundary_jump(r, delta, c, sigma, iter_K, T, list_out=True) for iter_K in K]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
@@ -183,12 +183,12 @@ def put_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(c, np.ndarray):
-        result = [put_boundary_jump(r, delta, iter_c, gamma, sigma, iter_K, T, list_out=True) for iter_c in c]
+        result = [put_boundary_jump(r, delta, iter_c, gamma, sigma, K, T, list_out=True) for iter_c in c]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
     if isinstance(gamma, np.ndarray):
-        result = [put_boundary_jump(r, delta, c, iter_gamma, sigma, iter_K, T, list_out=True) for iter_gamma in gamma]
+        result = [put_boundary_jump(r, delta, c, iter_gamma, sigma, K, T, list_out=True) for iter_gamma in gamma]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
@@ -198,6 +198,6 @@ def put_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(K, np.ndarray):
-        result = [put_boundary_jump(r, delta, sigma, iter_K, T, list_out=True) for iter_K in K]
+        result = [put_boundary_jump(r, delta, c, sigma, iter_K, T, list_out=True) for iter_K in K]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return

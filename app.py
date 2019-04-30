@@ -165,7 +165,7 @@ app.layout = html.Div([
     ], className='row'),
 ])
 
-def myplot(bound):
+def myplot(bound, slider, param):
     if len(bound.columns) == 1:
         return {
             'data': [go.Scatter(
@@ -183,8 +183,13 @@ def myplot(bound):
             )
         }
     else:
+        if param in ['r', 'delta', 'sigma', 'gamma']:
+            axis = np.arange(float(slider[0]), float(slider[1]), 0.01)
+        else:
+            axis = np.arange(float(slider[0]), float(slider[1]), 0.1)
         return {
             'data': [go.Surface(
+                x = axis,
                 y = bound.index.values,
                 z = bound.iloc[:,1:].values,
             )],
@@ -358,9 +363,10 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
 @app.callback(
     Output('bound', 'figure'), 
     [Input('interval', 'n_intervals'),
-    Input('slider', 'value')]
+    Input('slider', 'value'),
+    Input('param', 'value')]
 )
-def update_graph(n_intervals, slider):
+def update_graph(n_intervals, slider, param):
     while True:
         try:
             bound = pd.read_csv('bound.csv', index_col=0, header=None)
@@ -368,7 +374,7 @@ def update_graph(n_intervals, slider):
             print(e)
         else:
             break
-    return myplot(bound)
+    return myplot(bound, slider, param)
 
 # update slider
 @app.callback(

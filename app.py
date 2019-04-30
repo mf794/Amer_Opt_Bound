@@ -427,7 +427,7 @@ def update_slider_output(slider_val, n_intervals):
     print(text[0], text[1], slider_val[0], slider_val[1])
     if float(text[0]) == float(slider_val[0]) and float(text[1]) == float(slider_val[1]):
         print(1)
-        return info, 60*1000
+        return info, 60*60*1000
     else:
         print(0)
         with open('i.txt', 'w') as f:

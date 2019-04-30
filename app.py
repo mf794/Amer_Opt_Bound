@@ -302,22 +302,17 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.01)
             else:
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
-
             print(param_dict)
-            print(time.time())
             if kind == 'c':
                 safe_call_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
             elif kind == 'p':
                 safe_put_list(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-            print(time.time())
         else:
             print(param_dict)
-            print(time.time())
             if kind == 'c':
                 safe_call(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
             elif kind == 'p':
                 safe_put(param_dict['r'], param_dict['delta'], param_dict['sigma'], param_dict['k'], param_dict['t'])
-            print(time.time())
     else:
         if slider[0] != slider[1]:
             if param in ['r', 'delta', 'sigma','gamma']:
@@ -326,7 +321,6 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
                 param_dict[param] = np.arange(float(slider[0]), float(slider[1]), 0.1)
 
             print(param_dict)
-            print(time.time())
             if kind == 'c':
                 safe_call_jump_list(
                     param_dict['r'], param_dict['delta'], param_dict['sigma'], 
@@ -337,10 +331,8 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
                     param_dict['r'], param_dict['delta'], param_dict['sigma'], 
                     param_dict['c'], param_dict['gamma'],
                     param_dict['k'], param_dict['t'])            
-            print(time.time())
         else:
             print(param_dict)
-            print(time.time())
             if kind == 'c':
                 safe_call_jump(
                     param_dict['r'], param_dict['delta'], param_dict['sigma'], 
@@ -351,12 +343,9 @@ def run_code(model, kind, k, t, sigma, r, delta, c, gamma, slider, param):
                     param_dict['r'], param_dict['delta'], param_dict['sigma'], 
                     param_dict['c'], param_dict['gamma'],
                     param_dict['k'], param_dict['t'])
-            print(time.time())
     if model == 'mod2':
-        print(model)
         pass
     else:
-        print(model)
         return {'display':'none'}
 
 # update graph
@@ -428,12 +417,25 @@ def update_slider(param, k, t, sigma, r, delta, c, gamma):
         return (slider_min, slider_max, [gamma,gamma])
 
 @app.callback(
-    Output('slider_output', 'children'),
-    [Input('slider', 'value')],
+    [Output('slider_output', 'children'), Output('interval','interval')],
+    [Input('slider', 'value'), Input('interval', 'n_intervals')],
 )
-def update_slider_output(slider_val):
-    info = f'{slider_val[0]} ~ {slider_val[1]}'
-    return info
+def update_slider_output(slider_val, n_intervals):
+    info = f'{slider_val[0]}~{slider_val[1]}'
+    with open('i.txt', 'r') as f:
+        text = f.read().split('~')
+    print(text[0], text[1], slider_val[0], slider_val[1])
+    if float(text[0]) == float(slider_val[0]) and float(text[1]) == float(slider_val[1]):
+        print(1)
+        return info, 60*1000
+    else:
+        print(0)
+        with open('i.txt', 'w') as f:
+            f.write(info)
+        return info, 1000
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -185,6 +185,7 @@ def myplot(bound):
     else:
         return {
             'data': [go.Surface(
+                y = bound.index.values,
                 z = bound.iloc[:,1:].values,
             )],
             'layout': go.Layout(

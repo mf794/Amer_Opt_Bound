@@ -8,7 +8,7 @@ from math import factorial
 
 import numpy as np
 
-def call_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=20, list_out=False):
+def call_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=40, list_out=False):
     def LB(time, t0, ratio, i_jump):
         return (log(ratio) - i_jump * log(1 + gamma) - (r - delta - c * gamma - 0.5 * sigma ** 2) * (time - t0)) / sigma
 
@@ -66,7 +66,7 @@ def call_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=20, li
         # Use Gaussian Quadrature
         F1_int = [integrate.fixed_quad(Fc1_to_int, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
         F2_int = [integrate.fixed_quad(Fc2_to_int, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
-        loc = [optimize.brentq(lambda x: x - K - ECJ(x, absc[time_idx]) - F1_int[time_idx] * x + F2_int[time_idx], K, K + 100) for time_idx in range(len(absc) - 1)]
+        loc = [optimize.brentq(lambda x: x - K - ECJ(x, absc[time_idx]) - F1_int[time_idx] * x + F2_int[time_idx], K, K + 1000) for time_idx in range(len(absc) - 1)]
         loc.append(K * max(1, r / delta))
         f = interp1d(absc, loc, kind='cubic')
     
@@ -75,7 +75,7 @@ def call_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=20, li
     else:
         np.savetxt("bound.csv", np.transpose(np.vstack((np.linspace(0, T, 200), f(np.linspace(0, T, 200))))), delimiter=",")
 
-def put_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=20, list_out=False):
+def put_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=40, list_out=False):
     def LB(time, t0, ratio, i_jump):
         return (log(ratio) - i_jump * log(1 + gamma) - (r - delta - c * gamma - 0.5 * sigma ** 2) * (time - t0)) / sigma
 
@@ -131,7 +131,7 @@ def put_boundary_jump(r, delta, sigma, c, gamma, K, T, iteration=3, term=20, lis
     for iter_count in range(3):
         F1_int = [integrate.fixed_quad(Fp1_to_int, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
         F2_int = [integrate.fixed_quad(Fp2_to_int, absc[time_idx], T, args=(absc[time_idx], ), n=20)[0] for time_idx in range(len(absc) - 1)]
-        loc = [optimize.brentq(lambda x: K - x - ECJ(x, absc[time_idx]) + F1_int[time_idx] * x - F2_int[time_idx], 1, K) for time_idx in range(len(absc) - 1)]
+        loc = [optimize.brentq(lambda x: K - x - ECJ(x, absc[time_idx]) + F1_int[time_idx] * x - F2_int[time_idx], 0.001, K) for time_idx in range(len(absc) - 1)]
         loc.append(K)
         f = interp1d(absc, loc, kind='cubic')
 
@@ -167,7 +167,7 @@ def call_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(K, np.ndarray):
-        result = [call_boundary_jump(r, delta, c, sigma, iter_K, T, list_out=True) for iter_K in K]
+        result = [call_boundary_jump(r, delta, c, gamma, sigma, iter_K, T, list_out=True) for iter_K in K]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
     
@@ -198,6 +198,6 @@ def put_boundary_jump_list(r, delta, sigma, c, gamma, K, T):
         return
 
     if isinstance(K, np.ndarray):
-        result = [put_boundary_jump(r, delta, c, sigma, iter_K, T, list_out=True) for iter_K in K]
+        result = [put_boundary_jump(r, delta, c, gamma, sigma, iter_K, T, list_out=True) for iter_K in K]
         np.savetxt("bound.csv", np.vstack([np.linspace(0, T, 200), np.array(result)]).T, delimiter=",")
         return
